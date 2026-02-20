@@ -61,6 +61,25 @@ export async function POST(req: NextRequest) {
       if (!envRes.ok) throw new Error(await envRes.text());
     }
 
+    // 3. Trigger initial deployment
+    const deployRes = await fetch('https://api.vercel.com/v13/deployments', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${VERCEL_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: project.name,
+        target: 'production',
+        gitSource: {
+          type: 'github',
+          repo: GITHUB_REPO,
+          ref: 'main',
+        },
+      }),
+    });
+    if (!deployRes.ok) throw new Error(await deployRes.text());
+
     return NextResponse.json({ id: project.id, name: project.name });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
