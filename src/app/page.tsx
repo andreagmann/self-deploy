@@ -106,7 +106,7 @@ function ListProjects() {
 function CreateProject() {
   const [name, setName] = useState("");
   const [envVars, setEnvVars] = useState<EnvVar[]>([
-    { key: "AIRTABLE_API_KEY", value: "patd1xNEucLwX2u0a." },
+    { key: "AIRTABLE_API_KEY", value: "" },
     { key: "AIRTABLE_BASE_ID", value: "" },
     { key: "AIRTABLE_TABLE_NAME", value: "" },
   ]);
@@ -244,8 +244,8 @@ export default function App() {
     <div className="min-h-screen bg-gray-50 flex items-start justify-center pt-16 px-4">
       <div className="w-full max-w-xl">
         <div className="mb-6">
-          <h1 className="text-xl font-semibold text-gray-900">DXR Issue Tracker Project Manager</h1>
-          <p className="text-sm text-gray-500">Manage your DXR Issue Tracker deployments</p>
+          <h1 className="text-xl font-semibold text-gray-900">Vercel Project Manager</h1>
+          <p className="text-sm text-gray-500">Manage your Vercel deployments</p>
         </div>
         <div className="flex border-b mb-6">
           {TABS.map(t => (
