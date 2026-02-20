@@ -42,24 +42,28 @@ export async function POST(req: NextRequest) {
     if (!createRes.ok) throw new Error(await createRes.text());
     const project = await createRes.json();
 
-    if (envVars?.length) {
-      const envRes = await fetch(`https://api.vercel.com/v10/projects/${project.id}/env`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${VERCEL_TOKEN}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(
-          envVars.map(({ key, value }: { key: string; value: string }) => ({
-            key,
-            value,
-            target: ['production', 'preview', 'development'],
-            type: 'encrypted',
-          }))
-        ),
-      });
-      if (!envRes.ok) throw new Error(await envRes.text());
-    }
+    // Merge in the API key from the manager app's own env vars
+    const allEnvVars = [
+      { key: 'AIRTABLE_API_KEY', value: process.env.AIRTABLE_API_KEY! },
+      ...(envVars ?? []).filter(({ key }: { key: string }) => key !== 'AIRTABLE_API_KEY'),
+    ];
+
+    const envRes = await fetch(`https://api.vercel.com/v10/projects/${project.id}/env`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${VERCEL_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(
+        allEnvVars.map(({ key, value }: { key: string; value: string }) => ({
+          key,
+          value,
+          target: ['production', 'preview', 'development'],
+          type: 'encrypted',
+        }))
+      ),
+    });
+    if (!envRes.ok) throw new Error(await envRes.text());
 
     // 3. Get GitHub repo ID
     const [owner, repo] = GITHUB_REPO.split('/');

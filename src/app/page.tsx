@@ -106,7 +106,6 @@ function ListProjects() {
 function CreateProject() {
   const [name, setName] = useState("");
   const [envVars, setEnvVars] = useState<EnvVar[]>([
-    { key: "AIRTABLE_API_KEY", value: "" },
     { key: "AIRTABLE_BASE_ID", value: "" },
     { key: "AIRTABLE_TABLE_NAME", value: "" },
   ]);
