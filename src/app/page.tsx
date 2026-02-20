@@ -37,7 +37,7 @@ function EnvVarEditor({ envVars, setEnvVars }: { envVars: EnvVar[]; setEnvVars: 
           <input
             className="flex-1 border rounded px-3 py-2 text-sm font-mono"
             placeholder="VALUE"
-            type="password"
+            type={e.key === "AIRTABLE_API_KEY" ? "password" : "text"}
             value={e.value}
             onChange={ev => update(i, "value", ev.target.value)}
           />
@@ -81,7 +81,13 @@ function ListProjects() {
       />
       <div className="space-y-2">
         {filtered.map(p => (
-          <div key={p.id} className="border rounded-lg p-4 flex items-center justify-between bg-white">
+          <a
+            key={p.id}
+            href={p.latestDeployments?.[0]?.url ? `https://${p.latestDeployments[0].url}` : "#"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="border rounded-lg p-4 flex items-center justify-between bg-white hover:bg-gray-50 transition-colors cursor-pointer"
+          >
             <div>
               <div className="font-medium text-sm">{p.name}</div>
               <div className="text-xs text-gray-500">{p.latestDeployments?.[0]?.url}</div>
@@ -89,7 +95,7 @@ function ListProjects() {
             <span className={`text-xs px-2 py-1 rounded-full font-medium ${statusColor(p.latestDeployments?.[0]?.readyState)}`}>
               {p.latestDeployments?.[0]?.readyState ?? "NO DEPLOY"}
             </span>
-          </div>
+          </a>
         ))}
         {filtered.length === 0 && <div className="text-sm text-gray-400 text-center py-8">No projects found</div>}
       </div>
@@ -238,8 +244,8 @@ export default function App() {
     <div className="min-h-screen bg-gray-50 flex items-start justify-center pt-16 px-4">
       <div className="w-full max-w-xl">
         <div className="mb-6">
-          <h1 className="text-xl font-semibold text-gray-900">Vercel Project Manager</h1>
-          <p className="text-sm text-gray-500">Manage your Vercel deployments</p>
+          <h1 className="text-xl font-semibold text-gray-900">DXR Issue Tracker Project Manager</h1>
+          <p className="text-sm text-gray-500">Manage your DXR Issue Tracker deployments</p>
         </div>
         <div className="flex border-b mb-6">
           {TABS.map(t => (
