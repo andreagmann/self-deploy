@@ -61,7 +61,15 @@ export async function POST(req: NextRequest) {
       if (!envRes.ok) throw new Error(await envRes.text());
     }
 
-    // 3. Trigger initial deployment
+    // 3. Get GitHub repo ID
+    const [owner, repo] = GITHUB_REPO.split('/');
+    const repoRes = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+      headers: { Accept: 'application/vnd.github+json' },
+    });
+    if (!repoRes.ok) throw new Error(await repoRes.text());
+    const repoData = await repoRes.json();
+
+    // 4. Trigger initial deployment
     const deployRes = await fetch('https://api.vercel.com/v13/deployments', {
       method: 'POST',
       headers: {
@@ -75,6 +83,7 @@ export async function POST(req: NextRequest) {
           type: 'github',
           repo: GITHUB_REPO,
           ref: 'main',
+          repoId: repoData.id,
         },
       }),
     });
