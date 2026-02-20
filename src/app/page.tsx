@@ -58,7 +58,11 @@ function ListProjects() {
   useEffect(() => {
     fetch("/api/projects")
       .then(r => r.json())
-      .then(data => { setProjects(data); setLoading(false); })
+      .then(data => {
+        if (Array.isArray(data)) setProjects(data);
+        else setError(data.error || 'Unexpected response from API');
+        setLoading(false);
+      })
       .catch((e: Error) => { setError(e.message); setLoading(false); });
   }, []);
 
@@ -168,7 +172,10 @@ function Redeploy() {
   useEffect(() => {
     fetch("/api/projects")
       .then(r => r.json())
-      .then(data => { setProjects(data); setFetching(false); })
+      .then(data => {
+        if (Array.isArray(data)) setProjects(data);
+        setFetching(false);
+      })
       .catch(() => setFetching(false));
   }, []);
 
