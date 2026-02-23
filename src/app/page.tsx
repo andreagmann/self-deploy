@@ -29,22 +29,24 @@ function EnvVarEditor({ envVars, setEnvVars }: { envVars: EnvVar[]; setEnvVars: 
       {envVars.map((e, i) => (
         <div key={i} className="flex gap-2">
           <input
-            className="flex-1 border rounded px-3 py-2 text-sm font-mono"
+            className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm font-mono focus:outline-none focus:border-blue-500"
+          style={{ borderColor: "var(--sap-border)" }}
             placeholder="KEY"
             value={e.key}
             onChange={ev => update(i, "key", ev.target.value)}
           />
           <input
-            className="flex-1 border rounded px-3 py-2 text-sm font-mono"
+            className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm font-mono focus:outline-none focus:border-blue-500"
+          style={{ borderColor: "var(--sap-border)" }}
             placeholder="VALUE"
             type={e.key === "AIRTABLE_API_KEY" ? "password" : "text"}
             value={e.value}
             onChange={ev => update(i, "value", ev.target.value)}
           />
-          <button onClick={() => remove(i)} className="text-red-400 hover:text-red-600 px-2 text-lg">×</button>
+          <button onClick={() => remove(i)} className="text-red-400 hover:text-red-600 px-2 text-lg cursor-pointer">×</button>
         </div>
       ))}
-      <button onClick={add} className="text-sm text-blue-600 hover:underline">+ Add variable</button>
+      <button onClick={add} className="text-sm cursor-pointer" style={{ color: "var(--sap-brand)" }}>+ Add variable</button>
     </div>
   );
 }
@@ -159,7 +161,8 @@ function CreateProject() {
       <button
         onClick={handleSubmit}
         disabled={loading}
-        className="w-full bg-black text-white rounded px-4 py-2 text-sm font-medium hover:bg-gray-800 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+        className="w-full text-white rounded px-4 py-2 text-sm font-medium disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed transition-colors"
+        style={{ backgroundColor: "var(--sap-brand)" }}
       >
         {loading ? "Creating..." : "Create Project"}
       </button>
@@ -228,7 +231,8 @@ function Redeploy() {
       <button
         onClick={handleRedeploy}
         disabled={loading || fetching}
-        className="w-full bg-black text-white rounded px-4 py-2 text-sm font-medium hover:bg-gray-800 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+        className="w-full text-white rounded px-4 py-2 text-sm font-medium disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed transition-colors"
+        style={{ backgroundColor: "var(--sap-brand)" }}
       >
         {loading ? "Triggering..." : "Trigger Redeploy"}
       </button>
@@ -240,26 +244,41 @@ export default function App() {
   const [tab, setTab] = useState("List Projects");
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-start justify-center pt-16 px-4">
-      <div className="w-full max-w-xl">
+    <div className="min-h-screen" style={{ backgroundColor: "var(--sap-page-bg)", fontFamily: "'72', '72full', Arial, Helvetica, sans-serif" }}>
+      <div className="w-full flex items-center px-6 h-12 shadow-sm" style={{ backgroundColor: "var(--sap-shell-bg)" }}>
+        <span className="font-bold text-base tracking-wide mr-4" style={{ color: "var(--sap-shell-text)" }}>SAP</span>
+        <span className="text-sm font-medium opacity-90" style={{ color: "var(--sap-shell-text)" }}>DXR Issue Tracker Manager</span>
+      </div>
+
+      {/* Sub-header / breadcrumb bar */}
+      <div className="w-full px-8 py-3 bg-white border-b border-gray-200 shadow-sm">
+        <p className="text-xs text-gray-400">Home &rsaquo; <span className="text-gray-600">DXR Issue Tracker Manager</span></p>
+      </div>
+
+      <div className="max-w-3xl mx-auto px-6 py-8">
+        {/* Page title */}
         <div className="mb-6">
-          <h1 className="text-xl font-semibold text-gray-900">DXR Issue Tracker Manager</h1>
-          <p className="text-sm text-gray-500">Manage your DXR issue tracker deployments</p>
+          <h1 className="text-xl font-semibold text-gray-800">Manage your DXR issue tracker deployments</h1>
         </div>
-        <div className="flex border-b mb-6">
+
+        {/* Tab Bar */}
+        <div className="flex border-b border-gray-300 mb-0">
           {TABS.map(t => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-                tab === t ? "border-black text-black" : "border-transparent text-gray-500 hover:text-gray-700"
+              className={`px-5 py-3 text-sm font-medium border-b-2 -mb-px transition-colors cursor-pointer ${
+                tab === t ? "border-blue-600" : "border-transparent hover:border-blue-300"
               }`}
+              style={{ color: tab === t ? "var(--sap-brand)" : "var(--sap-text-secondary)", borderColor: tab === t ? "var(--sap-brand)" : undefined }}
             >
               {t}
             </button>
           ))}
         </div>
-        <div className="bg-white border rounded-lg p-6">
+
+        {/* Panel */}
+        <div className="bg-white border border-gray-200 rounded-b-lg rounded-tr-lg shadow-sm p-6">
           {tab === "List Projects" && <ListProjects />}
           {tab === "Create Project" && <CreateProject />}
           {tab === "Redeploy" && <Redeploy />}
