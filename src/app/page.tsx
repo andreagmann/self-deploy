@@ -46,6 +46,7 @@ const statusStyle = (state?: string): React.CSSProperties => ({
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
+  maxWidth: 480,
   border: `1px solid ${c.border}`,
   borderRadius: 4,
   padding: "8px 12px",
@@ -54,6 +55,7 @@ const inputStyle: React.CSSProperties = {
   outline: "none",
   backgroundColor: c.panelBg,
   color: c.textPrimary,
+  boxSizing: "border-box",
 };
 
 const btnPrimary = (disabled = false): React.CSSProperties => ({
@@ -232,7 +234,7 @@ function Redeploy() {
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <div>
         <label style={{ display: "block", fontSize: 14, fontWeight: 500, color: c.textPrimary, marginBottom: 4 }}>Select Project</label>
-        <select style={{ ...inputStyle, cursor: "pointer" }} value={selected} onChange={e => setSelected(e.target.value)} disabled={fetching}>
+        <select style={{ ...inputStyle, cursor: "pointer", appearance: "auto" }} value={selected} onChange={e => setSelected(e.target.value)} disabled={fetching}>
           <option value="">{fetching ? "Loading..." : "-- Choose a project --"}</option>
           {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
@@ -254,20 +256,8 @@ export default function App() {
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: c.pageBg, fontFamily: font }}>
-      {/* Shell Header */}
-      <div style={{ backgroundColor: c.shellBg, display: "flex", alignItems: "center", padding: "0 24px", height: 48, boxShadow: "0 2px 4px rgba(0,0,0,0.1)" }}>
-        <span style={{ color: c.shellText, fontWeight: 700, fontSize: 16, marginRight: 16, letterSpacing: 1 }}>SAP</span>
-        <span style={{ color: c.shellText, fontSize: 14, opacity: 0.9 }}>DXR Issue Tracker Manager</span>
-      </div>
-
-      {/* Breadcrumb */}
-      <div style={{ backgroundColor: c.panelBg, borderBottom: `1px solid ${c.border}`, padding: "10px 32px", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
-        <p style={{ fontSize: 12, color: c.textSecondary, margin: 0 }}>
-          Home › <span style={{ color: c.textPrimary }}>DXR Issue Tracker Manager</span>
-        </p>
-      </div>
-
       <div style={{ maxWidth: 760, margin: "0 auto", padding: "32px 24px" }}>
+        <h2 style={{ fontSize: 14, fontWeight: 600, color: c.textSecondary, marginBottom: 4, textTransform: "uppercase", letterSpacing: 1 }}>DXR Issue Tracker Manager</h2>
         <h1 style={{ fontSize: 20, fontWeight: 600, color: c.textPrimary, marginBottom: 24 }}>Manage your DXR issue tracker deployments</h1>
 
         {/* Tabs */}
