@@ -86,7 +86,7 @@ function ListProjects() {
             href={p.latestDeployments?.[0]?.url ? `https://${p.latestDeployments[0].url}` : "#"}
             target="_blank"
             rel="noopener noreferrer"
-            className="border rounded-lg p-4 flex items-center justify-between bg-white hover:bg-gray-50 transition-colors cursor-pointer"
+            className="border rounded-lg p-4 flex items-center justify-between bg-white hover:bg-gray-50 transition-colors cursor-pointer hover:cursor-pointer"
           >
             <div>
               <div className="font-medium text-sm">{p.name}</div>
@@ -159,7 +159,7 @@ function CreateProject() {
       <button
         onClick={handleSubmit}
         disabled={loading}
-        className="w-full bg-black text-white rounded px-4 py-2 text-sm font-medium hover:bg-gray-800 disabled:opacity-50"
+        className="w-full bg-black text-white rounded px-4 py-2 text-sm font-medium hover:bg-gray-800 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
       >
         {loading ? "Creating..." : "Create Project"}
       </button>
@@ -228,7 +228,7 @@ function Redeploy() {
       <button
         onClick={handleRedeploy}
         disabled={loading || fetching}
-        className="w-full bg-black text-white rounded px-4 py-2 text-sm font-medium hover:bg-gray-800 disabled:opacity-50"
+        className="w-full bg-black text-white rounded px-4 py-2 text-sm font-medium hover:bg-gray-800 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
       >
         {loading ? "Triggering..." : "Trigger Redeploy"}
       </button>
@@ -243,8 +243,8 @@ export default function App() {
     <div className="min-h-screen bg-gray-50 flex items-start justify-center pt-16 px-4">
       <div className="w-full max-w-xl">
         <div className="mb-6">
-          <h1 className="text-xl font-semibold text-gray-900">Vercel Project Manager</h1>
-          <p className="text-sm text-gray-500">Manage your Vercel deployments</p>
+          <h1 className="text-xl font-semibold text-gray-900">DXR Issue Tracker Manager</h1>
+          <p className="text-sm text-gray-500">Manage your DXR issue tracker deployments</p>
         </div>
         <div className="flex border-b mb-6">
           {TABS.map(t => (
