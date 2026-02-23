@@ -11,11 +11,64 @@ interface Project {
   latestDeployments?: { url: string; readyState: string }[];
 }
 
-const statusColor = (state?: string): React.CSSProperties => ({
-  READY:    { backgroundColor: "var(--sap-status-ready-bg)",    color: "var(--sap-status-ready-text)" },
-  ERROR:    { backgroundColor: "var(--sap-status-error-bg)",    color: "var(--sap-status-error-text)" },
-  BUILDING: { backgroundColor: "var(--sap-status-building-bg)", color: "var(--sap-status-building-text)" },
-}[state ?? ""] ?? { backgroundColor: "var(--sap-status-default-bg)", color: "var(--sap-status-default-text)" });
+const c = {
+  brand:              "var(--sap-brand)",
+  shellBg:            "var(--sap-shell-bg)",
+  shellText:          "var(--sap-shell-text)",
+  pageBg:             "var(--sap-page-bg)",
+  panelBg:            "var(--sap-panel-bg)",
+  border:             "var(--sap-border)",
+  textPrimary:        "var(--sap-text-primary)",
+  textSecondary:      "var(--sap-text-secondary)",
+  textPlaceholder:    "var(--sap-text-placeholder)",
+  error:              "var(--sap-error)",
+  errorBg:            "var(--sap-error-bg)",
+  success:            "var(--sap-success)",
+  successBg:          "var(--sap-success-bg)",
+  hoverBg:            "var(--sap-hover-bg)",
+  statusReadyBg:      "var(--sap-status-ready-bg)",
+  statusReadyText:    "var(--sap-status-ready-text)",
+  statusErrorBg:      "var(--sap-status-error-bg)",
+  statusErrorText:    "var(--sap-status-error-text)",
+  statusBuildingBg:   "var(--sap-status-building-bg)",
+  statusBuildingText: "var(--sap-status-building-text)",
+  statusDefaultBg:    "var(--sap-status-default-bg)",
+  statusDefaultText:  "var(--sap-status-default-text)",
+};
+
+const font = "'72', '72full', Arial, Helvetica, sans-serif";
+
+const statusStyle = (state?: string): React.CSSProperties => ({
+  READY:    { backgroundColor: c.statusReadyBg,    color: c.statusReadyText },
+  ERROR:    { backgroundColor: c.statusErrorBg,    color: c.statusErrorText },
+  BUILDING: { backgroundColor: c.statusBuildingBg, color: c.statusBuildingText },
+}[state ?? ""] ?? { backgroundColor: c.statusDefaultBg, color: c.statusDefaultText });
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  border: `1px solid ${c.border}`,
+  borderRadius: 4,
+  padding: "8px 12px",
+  fontSize: 14,
+  fontFamily: font,
+  outline: "none",
+  backgroundColor: c.panelBg,
+  color: c.textPrimary,
+};
+
+const btnPrimary = (disabled = false): React.CSSProperties => ({
+  width: "100%",
+  backgroundColor: c.brand,
+  color: c.shellText,
+  border: "none",
+  borderRadius: 4,
+  padding: "9px 16px",
+  fontSize: 14,
+  fontFamily: font,
+  fontWeight: 500,
+  cursor: disabled ? "not-allowed" : "pointer",
+  opacity: disabled ? 0.5 : 1,
+});
 
 function EnvVarEditor({ envVars, setEnvVars }: { envVars: EnvVar[]; setEnvVars: (v: EnvVar[]) => void }) {
   const add = () => setEnvVars([...envVars, { key: "", value: "" }]);
@@ -24,29 +77,16 @@ function EnvVarEditor({ envVars, setEnvVars }: { envVars: EnvVar[]; setEnvVars: 
     setEnvVars(envVars.map((e, j) => j === i ? { ...e, [field]: val } : e));
 
   return (
-    <div className="space-y-2">
-      <label className="block text-sm font-medium" style={{ color: "var(--sap-text-primary)" }}>Environment Variables</label>
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <label style={{ fontSize: 14, fontWeight: 500, color: c.textPrimary }}>Environment Variables</label>
       {envVars.map((e, i) => (
-        <div key={i} className="flex gap-2">
-          <input
-            className="flex-1 border rounded px-3 py-2 text-sm font-mono focus:outline-none"
-            style={{ borderColor: "var(--sap-border)" }}
-            placeholder="KEY"
-            value={e.key}
-            onChange={ev => update(i, "key", ev.target.value)}
-          />
-          <input
-            className="flex-1 border rounded px-3 py-2 text-sm font-mono focus:outline-none"
-            style={{ borderColor: "var(--sap-border)" }}
-            placeholder="VALUE"
-            type={e.key === "AIRTABLE_API_KEY" ? "password" : "text"}
-            value={e.value}
-            onChange={ev => update(i, "value", ev.target.value)}
-          />
-          <button onClick={() => remove(i)} className="px-2 text-lg cursor-pointer" style={{ color: "var(--sap-error)" }}>×</button>
+        <div key={i} style={{ display: "flex", gap: 8 }}>
+          <input style={{ ...inputStyle, flex: 1, fontFamily: "monospace" }} placeholder="KEY" value={e.key} onChange={ev => update(i, "key", ev.target.value)} />
+          <input style={{ ...inputStyle, flex: 1, fontFamily: "monospace" }} placeholder="VALUE" type={e.key === "AIRTABLE_API_KEY" ? "password" : "text"} value={e.value} onChange={ev => update(i, "value", ev.target.value)} />
+          <button onClick={() => remove(i)} style={{ background: "none", border: "none", color: c.error, fontSize: 20, cursor: "pointer", padding: "0 8px" }}>×</button>
         </div>
       ))}
-      <button onClick={add} className="text-sm cursor-pointer" style={{ color: "var(--sap-brand)" }}>+ Add variable</button>
+      <button onClick={add} style={{ background: "none", border: "none", color: c.brand, fontSize: 14, cursor: "pointer", textAlign: "left", padding: 0 }}>+ Add variable</button>
     </div>
   );
 }
@@ -56,13 +96,14 @@ function ListProjects() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/projects")
       .then(r => r.json())
       .then(data => {
         if (Array.isArray(data)) setProjects(data);
-        else setError(data.error || 'Unexpected response from API');
+        else setError(data.error || "Unexpected response");
         setLoading(false);
       })
       .catch((e: Error) => { setError(e.message); setLoading(false); });
@@ -70,40 +111,33 @@ function ListProjects() {
 
   const filtered = projects.filter(p => p.name.includes(search));
 
-  if (loading) return <div className="text-sm text-center py-8" style={{ color: "var(--sap-text-secondary)" }}>Loading projects...</div>;
-  if (error) return <div className="text-sm text-center py-8" style={{ color: "var(--sap-error)" }}>{error}</div>;
+  if (loading) return <p style={{ color: c.textSecondary, fontSize: 14, textAlign: "center", padding: "32px 0" }}>Loading projects...</p>;
+  if (error) return <p style={{ color: c.error, fontSize: 14, textAlign: "center", padding: "32px 0" }}>{error}</p>;
 
   return (
-    <div className="space-y-4">
-      <input
-        className="w-full border rounded px-3 py-2 text-sm focus:outline-none"
-        style={{ borderColor: "var(--sap-border)" }}
-        placeholder="Search projects..."
-        value={search}
-        onChange={e => setSearch(e.target.value)}
-      />
-      <div className="space-y-2">
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <input style={inputStyle} placeholder="Search projects..." value={search} onChange={e => setSearch(e.target.value)} />
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {filtered.map(p => (
           <a
             key={p.id}
             href={p.latestDeployments?.[0]?.url ? `https://${p.latestDeployments[0].url}` : "#"}
             target="_blank"
             rel="noopener noreferrer"
-            className="border rounded-lg p-4 flex items-center justify-between transition-colors cursor-pointer"
-            style={{ backgroundColor: "var(--sap-panel-bg)", borderColor: "var(--sap-border)" }}
-            onMouseEnter={e => (e.currentTarget.style.backgroundColor = "var(--sap-hover-bg)")}
-            onMouseLeave={e => (e.currentTarget.style.backgroundColor = "var(--sap-panel-bg)")}
+            onMouseEnter={() => setHoveredId(p.id)}
+            onMouseLeave={() => setHoveredId(null)}
+            style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: 16, border: `1px solid ${c.border}`, borderRadius: 6, backgroundColor: hoveredId === p.id ? c.hoverBg : c.panelBg, textDecoration: "none", cursor: "pointer", transition: "background-color 0.15s" }}
           >
             <div>
-              <div className="font-medium text-sm" style={{ color: "var(--sap-brand)" }}>{p.name}</div>
-              <div className="text-xs mt-0.5" style={{ color: "var(--sap-text-secondary)" }}>{p.latestDeployments?.[0]?.url}</div>
+              <div style={{ fontSize: 14, fontWeight: 500, color: c.brand }}>{p.name}</div>
+              <div style={{ fontSize: 12, color: c.textSecondary, marginTop: 2 }}>{p.latestDeployments?.[0]?.url}</div>
             </div>
-            <span className="text-xs px-2 py-1 rounded-full font-medium" style={statusColor(p.latestDeployments?.[0]?.readyState)}>
+            <span style={{ fontSize: 12, padding: "2px 10px", borderRadius: 999, fontWeight: 500, ...statusStyle(p.latestDeployments?.[0]?.readyState) }}>
               {p.latestDeployments?.[0]?.readyState ?? "NO DEPLOY"}
             </span>
           </a>
         ))}
-        {filtered.length === 0 && <div className="text-sm text-center py-8" style={{ color: "var(--sap-text-secondary)" }}>No projects found</div>}
+        {filtered.length === 0 && <p style={{ color: c.textSecondary, fontSize: 14, textAlign: "center", padding: "32px 0" }}>No projects found</p>}
       </div>
     </div>
   );
@@ -132,10 +166,7 @@ function CreateProject() {
       if (!res.ok) throw new Error(data.error);
       setStatus({ type: "success", msg: `Project "${data.name}" created successfully!` });
       setName("");
-      setEnvVars([
-        { key: "AIRTABLE_BASE_ID", value: "" },
-        { key: "AIRTABLE_TABLE_NAME", value: "" },
-      ]);
+      setEnvVars([{ key: "AIRTABLE_BASE_ID", value: "" }, { key: "AIRTABLE_TABLE_NAME", value: "" }]);
     } catch (e) {
       setStatus({ type: "error", msg: (e as Error).message });
     } finally {
@@ -144,33 +175,19 @@ function CreateProject() {
   };
 
   return (
-    <div className="space-y-4">
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <div>
-        <label className="block text-sm font-medium mb-1" style={{ color: "var(--sap-text-primary)" }}>Project Name</label>
-        <input
-          className="w-full border rounded px-3 py-2 text-sm focus:outline-none"
-          style={{ borderColor: "var(--sap-border)" }}
-          placeholder="my-new-project"
-          value={name}
-          onChange={e => setName(e.target.value.toLowerCase().replace(/\s+/g, "-"))}
-        />
-        <p className="text-xs mt-1" style={{ color: "var(--sap-text-placeholder)" }}>Lowercase letters, numbers, and hyphens only</p>
+        <label style={{ display: "block", fontSize: 14, fontWeight: 500, color: c.textPrimary, marginBottom: 4 }}>Project Name</label>
+        <input style={inputStyle} placeholder="my-new-project" value={name} onChange={e => setName(e.target.value.toLowerCase().replace(/\s+/g, "-"))} />
+        <p style={{ fontSize: 12, color: c.textPlaceholder, marginTop: 4 }}>Lowercase letters, numbers, and hyphens only</p>
       </div>
       <EnvVarEditor envVars={envVars} setEnvVars={setEnvVars} />
       {status && (
-        <div className="text-sm px-3 py-2 rounded" style={{
-          backgroundColor: status.type === "error" ? "var(--sap-error-bg)" : "var(--sap-success-bg)",
-          color: status.type === "error" ? "var(--sap-error)" : "var(--sap-success)"
-        }}>
+        <div style={{ fontSize: 14, padding: "8px 12px", borderRadius: 4, backgroundColor: status.type === "error" ? c.errorBg : c.successBg, color: status.type === "error" ? c.error : c.success }}>
           {status.msg}
         </div>
       )}
-      <button
-        onClick={handleSubmit}
-        disabled={loading}
-        className="w-full text-white rounded px-4 py-2 text-sm font-medium disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed transition-colors"
-        style={{ backgroundColor: "var(--sap-brand)" }}
-      >
+      <button onClick={handleSubmit} disabled={loading} style={btnPrimary(loading)}>
         {loading ? "Creating..." : "Create Project"}
       </button>
     </div>
@@ -187,10 +204,7 @@ function Redeploy() {
   useEffect(() => {
     fetch("/api/projects")
       .then(r => r.json())
-      .then(data => {
-        if (Array.isArray(data)) setProjects(data);
-        setFetching(false);
-      })
+      .then(data => { if (Array.isArray(data)) setProjects(data); setFetching(false); })
       .catch(() => setFetching(false));
   }, []);
 
@@ -215,36 +229,20 @@ function Redeploy() {
   };
 
   return (
-    <div className="space-y-4">
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <div>
-        <label className="block text-sm font-medium mb-1" style={{ color: "var(--sap-text-primary)" }}>Select Project</label>
-        <select
-          className="w-full border rounded px-3 py-2 text-sm focus:outline-none cursor-pointer"
-          style={{ borderColor: "var(--sap-border)" }}
-          value={selected}
-          onChange={e => setSelected(e.target.value)}
-          disabled={fetching}
-        >
+        <label style={{ display: "block", fontSize: 14, fontWeight: 500, color: c.textPrimary, marginBottom: 4 }}>Select Project</label>
+        <select style={{ ...inputStyle, cursor: "pointer" }} value={selected} onChange={e => setSelected(e.target.value)} disabled={fetching}>
           <option value="">{fetching ? "Loading..." : "-- Choose a project --"}</option>
-          {projects.map(p => (
-            <option key={p.id} value={p.id}>{p.name}</option>
-          ))}
+          {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
       </div>
       {status && (
-        <div className="text-sm px-3 py-2 rounded" style={{
-          backgroundColor: status.type === "error" ? "var(--sap-error-bg)" : "var(--sap-success-bg)",
-          color: status.type === "error" ? "var(--sap-error)" : "var(--sap-success)"
-        }}>
+        <div style={{ fontSize: 14, padding: "8px 12px", borderRadius: 4, backgroundColor: status.type === "error" ? c.errorBg : c.successBg, color: status.type === "error" ? c.error : c.success }}>
           {status.msg}
         </div>
       )}
-      <button
-        onClick={handleRedeploy}
-        disabled={loading || fetching}
-        className="w-full text-white rounded px-4 py-2 text-sm font-medium disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed transition-colors"
-        style={{ backgroundColor: "var(--sap-brand)" }}
-      >
+      <button onClick={handleRedeploy} disabled={loading || fetching} style={btnPrimary(loading || fetching)}>
         {loading ? "Triggering..." : "Trigger Redeploy"}
       </button>
     </div>
@@ -255,35 +253,41 @@ export default function App() {
   const [tab, setTab] = useState("List Projects");
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--sap-page-bg)" }}>
-      {/* SAP Shell Header */}
-      <div className="w-full flex items-center px-6 h-12 shadow-sm" style={{ backgroundColor: "var(--sap-shell-bg)" }}>
-        <span className="font-bold text-base tracking-wide mr-4" style={{ color: "var(--sap-shell-text)" }}>SAP</span>
-        <span className="text-sm font-medium opacity-90" style={{ color: "var(--sap-shell-text)" }}>DXR Issue Tracker Manager</span>
+    <div style={{ minHeight: "100vh", backgroundColor: c.pageBg, fontFamily: font }}>
+      {/* Shell Header */}
+      <div style={{ backgroundColor: c.shellBg, display: "flex", alignItems: "center", padding: "0 24px", height: 48, boxShadow: "0 2px 4px rgba(0,0,0,0.1)" }}>
+        <span style={{ color: c.shellText, fontWeight: 700, fontSize: 16, marginRight: 16, letterSpacing: 1 }}>SAP</span>
+        <span style={{ color: c.shellText, fontSize: 14, opacity: 0.9 }}>DXR Issue Tracker Manager</span>
       </div>
 
       {/* Breadcrumb */}
-      <div className="w-full px-8 py-3 border-b shadow-sm" style={{ backgroundColor: "var(--sap-panel-bg)", borderColor: "var(--sap-border)" }}>
-        <p className="text-xs" style={{ color: "var(--sap-text-secondary)" }}>
-          Home &rsaquo; <span style={{ color: "var(--sap-text-primary)" }}>DXR Issue Tracker Manager</span>
+      <div style={{ backgroundColor: c.panelBg, borderBottom: `1px solid ${c.border}`, padding: "10px 32px", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+        <p style={{ fontSize: 12, color: c.textSecondary, margin: 0 }}>
+          Home › <span style={{ color: c.textPrimary }}>DXR Issue Tracker Manager</span>
         </p>
       </div>
 
-      <div className="max-w-3xl mx-auto px-6 py-8">
-        <div className="mb-6">
-          <h1 className="text-xl font-semibold" style={{ color: "var(--sap-text-primary)" }}>Manage your DXR issue tracker deployments</h1>
-        </div>
+      <div style={{ maxWidth: 760, margin: "0 auto", padding: "32px 24px" }}>
+        <h1 style={{ fontSize: 20, fontWeight: 600, color: c.textPrimary, marginBottom: 24 }}>Manage your DXR issue tracker deployments</h1>
 
         {/* Tabs */}
-        <div className="flex border-b" style={{ borderColor: "var(--sap-border)" }}>
+        <div style={{ display: "flex", borderBottom: `1px solid ${c.border}` }}>
           {TABS.map(t => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className="px-5 py-3 text-sm font-medium border-b-2 -mb-px transition-colors cursor-pointer"
               style={{
-                color: tab === t ? "var(--sap-brand)" : "var(--sap-text-secondary)",
-                borderColor: tab === t ? "var(--sap-brand)" : "transparent",
+                padding: "12px 20px",
+                fontSize: 14,
+                fontWeight: 500,
+                fontFamily: font,
+                border: "none",
+                borderBottom: tab === t ? `2px solid ${c.brand}` : "2px solid transparent",
+                backgroundColor: "transparent",
+                color: tab === t ? c.brand : c.textSecondary,
+                cursor: "pointer",
+                marginBottom: -1,
+                transition: "color 0.15s",
               }}
             >
               {t}
@@ -292,7 +296,7 @@ export default function App() {
         </div>
 
         {/* Panel */}
-        <div className="bg-white border border-t-0 rounded-b-lg shadow-sm p-6" style={{ borderColor: "var(--sap-border)", backgroundColor: "var(--sap-panel-bg)" }}>
+        <div style={{ backgroundColor: c.panelBg, border: `1px solid ${c.border}`, borderTop: "none", borderRadius: "0 0 6px 6px", padding: 24, boxShadow: "0 2px 6px rgba(0,0,0,0.05)" }}>
           {tab === "List Projects" && <ListProjects />}
           {tab === "Create Project" && <CreateProject />}
           {tab === "Redeploy" && <Redeploy />}
